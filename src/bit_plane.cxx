@@ -81,9 +81,8 @@
 #include "bit_plane.hxx"
 #include "blt.hxx"
 
+#include <cassert> // for assert()
 #include <cstring> // for memcpy()
-
-#include <cassert>
 
 BitPlane::BitPlane() : width(0), height(0), store(0) {
   // Setting width and height to zero makes the BitPlane valid and
@@ -128,6 +127,51 @@ BitPlane::BitPlane(const BitPlane &copy) {
   autoDelete = copy.autoDelete;
 }
 
+//**********************************************************************
+//                                                      BitPlane::create
+//**********************************************************************
+//
+//**    Synopsis
+//
+//      void create(cx, cy)
+//      int cx;
+//      int cy;
+//
+//**    Description
+//
+//      The create operation dynamically creates a bit plane on the free
+//      store with the specified width and height.  The destructor
+//      releases the bit block memory.  To free it another way, execute
+//      create(0, 0).  In the event of allocation failure, create either
+//      returns false or throws xalloc, and in any case the BitPlane is
+//      empty (0 by 0).
+//
+//**********************************************************************
+
+bool BitPlane::create(int cx, int cy) {
+  if (cx < 0) // Permit negative widths and
+    cx = -cx; // heights by negating them just
+  if (cy < 0) // like extents.
+    cy = -cy;
+  if (cx <= 0 || cy <= 0) // <= traps INT_MIN
+    return false;
+
+  // How to create a new bit plane: first, dispose of the old one; next,
+  // compute the scan line size in double-words; finally, allocate free-
+  // storage for the bits.
+  this->~BitPlane();
+  widthLongWords = cx >> 5;
+  if (cx & 31)
+    ++widthLongWords;
+  store = new longword[widthLongWords * cy];
+  if (store == 0)
+    return false;
+  autoDelete = true;
+  width = cx;
+  height = cy;
+  return true;
+}
+
 // BitPlane::findBits(x,y)
 // ~~~~~~~~~~~~~~~~~~~~~~~
 // Given the co-ordinate of a bit, findBits returns the address of its
@@ -137,9 +181,7 @@ BitPlane::BitPlane(const BitPlane &copy) {
 // significant bit, 31 to bit zero.  The x and y co-ordinates aren't
 // clipped.  FindBits is a protected helper.
 
-inline longword *BitPlane::findBits(int x, int y) const {
-  return store + widthLongWords * y + (x >> 5);
-}
+inline longword *BitPlane::findBits(int x, int y) const { return store + widthLongWords * y + (x >> 5); }
 
 inline const longword *BitPlane::bits(int x, int y) const { return findBits(x, y); }
 
