@@ -25,22 +25,22 @@ class PhaseAlign {
 public:
   virtual ~PhaseAlign() = default;
   virtual void prefetch() {}
-  virtual longword fetch() // Fetch() retrieves the next
+  virtual scanbyte fetch() // Fetch() retrieves the next
   {                        // phase-aligned longword and steps
     return *store++;       // along the scan line.
   }
-  longword *store = nullptr;
+  scanbyte *store = nullptr;
 };
 
 class RightShift : public PhaseAlign {
 public:
-  longword fetch() override;
-  longword carry = 0;
+  scanbyte fetch() override;
+  scanbyte carry = 0;
   int shiftCount = 0;
 };
 
 class LeftShift : public RightShift {
 public:
   void prefetch() override { carry = *store; }
-  longword fetch() override;
+  scanbyte fetch() override;
 };

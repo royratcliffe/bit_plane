@@ -60,7 +60,7 @@ class BitPlane {
 
 public:
   BitPlane();
-  BitPlane(int cx, int cy, longword v[]);
+  BitPlane(int cx, int cy, scanbyte v[]);
   // Don't bit-wise copy a BitPlane!
   BitPlane(const BitPlane &copy);
 
@@ -85,11 +85,11 @@ public:
 protected:
   int width = 0;
   int height = 0;
-  int widthLongWords = 0;
-  longword *store = nullptr;
+  int widthScanBytes = 0;
+  scanbyte *store = nullptr;
   bool autoDelete = false;
-  longword *findBits(int x, int y) const;
+  scanbyte *findBits(int x, int y) const;
 
 public:
-  const longword *bits(int x, int y) const;
+  const scanbyte *bits(int x, int y) const;
 };

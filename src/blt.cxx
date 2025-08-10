@@ -4,7 +4,7 @@
 #define S fetch()  // 32-bit source operand
 
 #define ropRevPolish(revPolish, x)                                                                                     \
-  longword Blt::rop##revPolish() { return x; }
+  scanbyte Blt::rop##revPolish() { return x; }
 
 ropRevPolish(0, 0x00U) ropRevPolish(DSon, ~(D | S)) ropRevPolish(DSna, D & ~S) ropRevPolish(Sn, ~S)
     ropRevPolish(SDna, S & ~D) ropRevPolish(Dn, ~D) ropRevPolish(DSx, D ^ S) ropRevPolish(DSan, ~(D &S))

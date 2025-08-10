@@ -1,7 +1,7 @@
 #include <bit_plane.hxx>
 
 extern "C" int test_pat() {
-  longword vPatBits[] = {
+  scanbyte vPatBits[] = {
       0x40, 0x00, 0x00, 0x00, // #. (black-white)
       0x80, 0x00, 0x00, 0x00, // .# (white-black)
   };

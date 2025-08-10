@@ -25,33 +25,33 @@ public:
   Blt(Rop2 rop2) : rop(vrop[rop2]) {
     // static_assert(0 <= rop2 && rop2 < Rop2::ropMax); // ropMax == 16
   }
-  void fetchLogicStore(longword mask) { *store++ = (*store & ~mask) | (mask & fetchLogic()); }
+  void fetchLogicStore(scanbyte mask) { *store++ = (*store & ~mask) | (mask & fetchLogic()); }
   void fetchLogicStore() { *store++ = fetchLogic(); }
-  longword fetchLogic() {
+  scanbyte fetchLogic() {
     // Invoke the Boolean raster-operation; it calls fetch() by
     // referencing the source operand.
     return (this->*rop)();
   }
-  longword fetch() { return phaseAlign->fetch(); }
-  longword rop0();
-  longword ropDSon();
-  longword ropDSna();
-  longword ropSn();
-  longword ropSDna();
-  longword ropDn();
-  longword ropDSx();
-  longword ropDSan();
-  longword ropDSa();
-  longword ropDSxn();
-  longword ropD();
-  longword ropDSno();
-  longword ropS();
-  longword ropSDno();
-  longword ropDSo();
-  longword rop1();
-  typedef longword (Blt::*Rop)();
+  scanbyte fetch() { return phaseAlign->fetch(); }
+  scanbyte rop0();
+  scanbyte ropDSon();
+  scanbyte ropDSna();
+  scanbyte ropSn();
+  scanbyte ropSDna();
+  scanbyte ropDn();
+  scanbyte ropDSx();
+  scanbyte ropDSan();
+  scanbyte ropDSa();
+  scanbyte ropDSxn();
+  scanbyte ropD();
+  scanbyte ropDSno();
+  scanbyte ropS();
+  scanbyte ropSDno();
+  scanbyte ropDSo();
+  scanbyte rop1();
+  typedef scanbyte (Blt::*Rop)();
   static Rop vrop[];
   PhaseAlign *phaseAlign; // fetch: phaseAlign->fetch()
   Rop rop;                // logic: (this->*rop)()
-  longword *store;        // store: *store
+  scanbyte *store;        // store: *store
 };

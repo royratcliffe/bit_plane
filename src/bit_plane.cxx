@@ -92,7 +92,7 @@ BitPlane::BitPlane() : width(0), height(0), store(0) {
   // care because delete []NULL is okay.
   autoDelete = false;
 }
-BitPlane::BitPlane(int cx, int cy, longword v[]) {
+BitPlane::BitPlane(int cx, int cy, scanbyte v[]) {
   if (cx < 0)
     cx = -cx;
   if (cy < 0)
@@ -100,9 +100,9 @@ BitPlane::BitPlane(int cx, int cy, longword v[]) {
   if (cx > 0 && cy > 0) {
     width = cx;
     height = cy;
-    widthLongWords = cx >> 3;
+    widthScanBytes = cx >> 3;
     if (cx & 7)
-      ++widthLongWords;
+      ++widthScanBytes;
   } else {
     width = 0;
     height = 0;
@@ -112,17 +112,17 @@ BitPlane::BitPlane(int cx, int cy, longword v[]) {
 }
 // Don't bit-wise copy a BitPlane!
 BitPlane::BitPlane(const BitPlane &copy) {
-  longword *v;
+  scanbyte *v;
   if (copy.autoDelete) {
-    v = new longword[copy.widthLongWords * copy.height];
+    v = new scanbyte[copy.widthScanBytes * copy.height];
     if (v == 0)
       return;
-    (void)memcpy(v, copy.store, sizeof(longword) * copy.widthLongWords * copy.height);
+    (void)memcpy(v, copy.store, sizeof(scanbyte) * copy.widthScanBytes * copy.height);
   } else
     v = copy.store;
   width = copy.width;
   height = copy.height;
-  widthLongWords = copy.widthLongWords;
+  widthScanBytes = copy.widthScanBytes;
   store = v;
   autoDelete = copy.autoDelete;
 }
@@ -160,10 +160,10 @@ bool BitPlane::create(int cx, int cy) {
   // compute the scan line size in double-words; finally, allocate free-
   // storage for the bits.
   this->~BitPlane();
-  widthLongWords = cx >> 3;
+  widthScanBytes = cx >> 3;
   if (cx & 7)
-    ++widthLongWords;
-  store = new longword[widthLongWords * cy];
+    ++widthScanBytes;
+  store = new scanbyte[widthScanBytes * cy];
   if (store == 0)
     return false;
   autoDelete = true;
@@ -181,9 +181,9 @@ bool BitPlane::create(int cx, int cy) {
 // significant bit, 7 to bit zero.  The x and y co-ordinates aren't
 // clipped.  FindBits is a protected helper.
 
-inline longword *BitPlane::findBits(int x, int y) const { return store + widthLongWords * y + (x >> 3); }
+inline scanbyte *BitPlane::findBits(int x, int y) const { return store + widthScanBytes * y + (x >> 3); }
 
-inline const longword *BitPlane::bits(int x, int y) const { return findBits(x, y); }
+inline const scanbyte *BitPlane::bits(int x, int y) const { return findBits(x, y); }
 
 //**********************************************************************
 //                                                      BitPlane::bitBlt
@@ -350,18 +350,18 @@ bool BitPlane::bitBlt(int x, int y, int cx, int cy, const BitPlane &bitPlaneSrc,
   // always at least one because 0<cx.  Expression (xMax>>5) - (x>>5)
   // yields how many ``extra'' longwords per scan line after the first.
   const int xMax = x + cx - 1;
-  const int extraLongWordCount = (xMax >> 3) - (x >> 3);
-  const longword scanOrgMask = 0xffU >> (x & 7);
-  const longword scanExtMask = 0xffU << (7 - (xMax & 7));
-  const int displace = widthLongWords - 1 - extraLongWordCount;
-  const int displaceSrc = bitPlaneSrc.widthLongWords - 1 - extraLongWordCount;
+  const int extraScanByteCount = (xMax >> 3) - (x >> 3);
+  const scanbyte scanOrgMask = 0xffU >> (x & 7);
+  const scanbyte scanExtMask = 0xffU << (7 - (xMax & 7));
+  const int displace = widthScanBytes - 1 - extraScanByteCount;
+  const int displaceSrc = bitPlaneSrc.widthScanBytes - 1 - extraScanByteCount;
   blt.store = findBits(x, y);
   blt.phaseAlign->store = bitPlaneSrc.findBits(xSrc, ySrc);
-  if (extraLongWordCount == 0) {
+  if (extraScanByteCount == 0) {
     // The scan line's bits begin and end in the same longword.  There's
     // just one fetchLogicStore every scan line, so optimize the blit
     // by merging the masks for a single-step fetch-logic-store.
-    const longword scanMask = scanOrgMask & scanExtMask;
+    const scanbyte scanMask = scanOrgMask & scanExtMask;
     while (cy--) {
       blt.phaseAlign->prefetch();
       blt.fetchLogicStore(scanMask);
@@ -372,7 +372,7 @@ bool BitPlane::bitBlt(int x, int y, int cx, int cy, const BitPlane &bitPlaneSrc,
     while (cy--) {
       blt.phaseAlign->prefetch();
       blt.fetchLogicStore(scanOrgMask);
-      int longWordCount = extraLongWordCount;
+      int longWordCount = extraScanByteCount;
       while (--longWordCount)
         blt.fetchLogicStore();
       blt.fetchLogicStore(scanExtMask);
