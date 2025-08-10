@@ -92,14 +92,4 @@ protected:
 
 public:
   const longword *bits(int x, int y) const;
-
-  // When your long is the `wrong' endian, bswap it!  Bswap turns
-  // little-endian longs into big-endian longs, and vice versa.  It's
-  // the same process for both conversions.
-  //
-  // `Bswapping' is a byte-swapping exercise.  Given an unsigned long of
-  // 0x76543210, for example, bswap gives back 0x10325476.  Another
-  // bswap gets you back where you started; bswapping 0x10325476 gives
-  // you 0x76543210.  In summary, bswap(bswap(x))==x.
-  static inline longword bswap(longword x) { return x; }
 };
