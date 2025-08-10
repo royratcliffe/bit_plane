@@ -76,18 +76,18 @@ public:
       delete[] store;
       autoDelete = false;
     }
-    store = 0;
+    store = nullptr;
   }
 
   int getWidth() const { return width; }
   int getHeight() const { return height; }
 
 protected:
-  int width;
-  int height;
-  int widthLongWords;
-  longword *store;
-  bool autoDelete;
+  int width = 0;
+  int height = 0;
+  int widthLongWords = 0;
+  longword *store = nullptr;
+  bool autoDelete = false;
   longword *findBits(int x, int y) const;
 
 public:
