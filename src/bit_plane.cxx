@@ -372,8 +372,8 @@ bool BitPlane::bitBlt(int x, int y, int cx, int cy, const BitPlane &bitPlaneSrc,
     while (cy--) {
       blt.phaseAlign->prefetch();
       blt.fetchLogicStore(scanOrgMask);
-      int longWordCount = extraScanByteCount;
-      while (--longWordCount)
+      int scanByteCount = extraScanByteCount;
+      while (--scanByteCount)
         blt.fetchLogicStore();
       blt.fetchLogicStore(scanExtMask);
       blt.store += displace;
