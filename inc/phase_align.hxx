@@ -1,4 +1,8 @@
+#pragma once
+
 #include "scan.hxx"
+
+#include <cstddef>
 
 // PhaseAlign functor
 // ~~~~~~~~~~ ~~~~~~~
@@ -19,23 +23,24 @@
 
 class PhaseAlign {
 public:
+  virtual ~PhaseAlign() = default;
   virtual void prefetch() {}
   virtual longword fetch() // Fetch() retrieves the next
   {                        // phase-aligned longword and steps
     return *store++;       // along the scan line.
   }
-  longword *store;
+  longword *store = nullptr;
 };
 
 class RightShift : public PhaseAlign {
 public:
-  virtual longword fetch();
-  longword carry;
-  int shiftCount;
+  longword fetch() override;
+  longword carry = 0;
+  int shiftCount = 0;
 };
 
 class LeftShift : public RightShift {
 public:
-  virtual void prefetch() { carry = *store; }
-  virtual longword fetch();
+  void prefetch() override { carry = *store; }
+  longword fetch() override;
 };
