@@ -35,7 +35,7 @@ public:
 class RightShift : public PhaseAlign {
 public:
   scanbyte fetch() override;
-  scanbyte carry = 0;
+  scanbyte carry = 0x00U;
   int shiftCount = 0;
 };
 
