@@ -100,8 +100,8 @@ BitPlane::BitPlane(int cx, int cy, longword v[]) {
   if (cx > 0 && cy > 0) {
     width = cx;
     height = cy;
-    widthLongWords = cx >> 5;
-    if (cx & 31)
+    widthLongWords = cx >> 3;
+    if (cx & 7)
       ++widthLongWords;
   } else {
     width = 0;
@@ -160,8 +160,8 @@ bool BitPlane::create(int cx, int cy) {
   // compute the scan line size in double-words; finally, allocate free-
   // storage for the bits.
   this->~BitPlane();
-  widthLongWords = cx >> 5;
-  if (cx & 31)
+  widthLongWords = cx >> 3;
+  if (cx & 7)
     ++widthLongWords;
   store = new longword[widthLongWords * cy];
   if (store == 0)
@@ -176,12 +176,12 @@ bool BitPlane::create(int cx, int cy) {
 // ~~~~~~~~~~~~~~~~~~~~~~~
 // Given the co-ordinate of a bit, findBits returns the address of its
 // longword.  The calculation assumes one bit per pixel and longword-aligned
-// scan lines --- BitPlane class constraints.  Expression x & 31 gives
+// scan lines --- BitPlane class constraints.  Expression x & 7 gives
 // the bit's position within the longword; where 0 corresponds to the most
-// significant bit, 31 to bit zero.  The x and y co-ordinates aren't
+// significant bit, 7 to bit zero.  The x and y co-ordinates aren't
 // clipped.  FindBits is a protected helper.
 
-inline longword *BitPlane::findBits(int x, int y) const { return store + widthLongWords * y + (x >> 5); }
+inline longword *BitPlane::findBits(int x, int y) const { return store + widthLongWords * y + (x >> 3); }
 
 inline const longword *BitPlane::bits(int x, int y) const { return findBits(x, y); }
 
@@ -278,14 +278,20 @@ bool BitPlane::bitBlt(int x, int y, int cx, int cy, const BitPlane &bitPlaneSrc,
   xSrc += xOff;
   cx -= xOff;
   assert(x >= 0 && xSrc >= 0 && 0 < cx);
-  int cxMax = width - x; // cxMax is the difference betw-
+  // cxMax is the difference betw-
+  // een the width and the origin,
+  // i.e. the maximum transfer
+  // extent possible.  If zero or
+  // negative, the origin is bey-
+  // ond the plane.
+  int cxMax = width - x;
   if (0 >= cxMax)
-    return false;                   // een the width and the origin,
-  if (cxMax < cx)                   // i.e. the maximum transfer
-    cx = cxMax;                     // extent possible.  If zero or
-  cxMax = bitPlaneSrc.width - xSrc; // negative, the origin is bey-
+    return false;
+  if (cxMax < cx)
+    cx = cxMax;
+  cxMax = bitPlaneSrc.width - xSrc;
   if (0 >= cxMax)
-    return false; // ond the plane.
+    return false;
   if (cxMax < cx)
     cx = cxMax;
   int yOff = y < 0 ? (y < ySrc ? -y : -ySrc) : (ySrc < 0 ? -ySrc : 0);
@@ -309,15 +315,15 @@ bool BitPlane::bitBlt(int x, int y, int cx, int cy, const BitPlane &bitPlaneSrc,
 
   // Decide how to fetch the source bits.  There are three PhaseAlign
   // functors to choose from, based on how the bits are out of phase.
-  // The destination alignment is x & 31, i.e. how many bits from the
-  // left side of the longword.  Expression xSrc & 31 gives the source
+  // The destination alignment is x & 7, i.e. how many bits from the
+  // left side of the longword.  Expression xSrc & 7 gives the source
   // alignment.  The sign and magnitude of the difference between the
   // alignments determines the direction and amount of shift.
   Blt blt(rop2);
   PhaseAlign fetch;
   RightShift fetchRightShift;
   LeftShift fetchLeftShift;
-  int shiftCount = (x & 31) - (xSrc & 31);
+  int shiftCount = (x & 7) - (xSrc & 7);
   if (shiftCount < 0) {
     fetchLeftShift.shiftCount = -shiftCount;
     blt.phaseAlign = &fetchLeftShift;
@@ -344,9 +350,9 @@ bool BitPlane::bitBlt(int x, int y, int cx, int cy, const BitPlane &bitPlaneSrc,
   // always at least one because 0<cx.  Expression (xMax>>5) - (x>>5)
   // yields how many ``extra'' longwords per scan line after the first.
   const int xMax = x + cx - 1;
-  const int extraLongWordCount = (xMax >> 5) - (x >> 5);
-  const longword scanOrgMask = 0xffffffff >> (x & 31);
-  const longword scanExtMask = 0xffffffff << (31 - (xMax & 31));
+  const int extraLongWordCount = (xMax >> 3) - (x >> 3);
+  const longword scanOrgMask = 0xffU >> (x & 7);
+  const longword scanExtMask = 0xffU << (7 - (xMax & 7));
   const int displace = widthLongWords - 1 - extraLongWordCount;
   const int displaceSrc = bitPlaneSrc.widthLongWords - 1 - extraLongWordCount;
   blt.store = findBits(x, y);

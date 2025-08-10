@@ -16,8 +16,8 @@ inline void xchgl(longword &r, longword &g) {
   r = g;
   g = t;
 }
-inline void shrdl(int c, longword &r, longword &g) { g = (r << (32 - c)) | (g >> c); }
-inline void shldl(int c, longword &r, longword &g) { g = (g << c) | (r >> (32 - c)); }
+inline void shrdl(int c, longword &r, longword &g) { g = (r << (8 - c)) | (g >> c); }
+inline void shldl(int c, longword &r, longword &g) { g = (g << c) | (r >> (8 - c)); }
 
 longword RightShift::fetch() {
   longword hi;
