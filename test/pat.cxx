@@ -1,4 +1,4 @@
-#include <bit_plane.hxx>
+#include <raster/bit_plane.hxx>
 
 #include <cassert>
 #include <iostream>

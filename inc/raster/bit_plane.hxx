@@ -54,8 +54,8 @@
 //
 //**********************************************************************
 
-#include "rop.hxx"
-#include "scan.hxx"
+#include "raster/rop.hxx"
+#include "raster/scan.hxx"
 
 namespace raster {
 

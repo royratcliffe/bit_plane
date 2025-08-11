@@ -2,14 +2,14 @@ cmake_minimum_required(VERSION 3.25)
 project(bit_plane)
 
 add_library(bit_plane
-    inc/scan.hxx
-    inc/rop.hxx
-    inc/blt.hxx
-    src/blt.cxx
-    inc/phase_align.hxx
-    src/phase_align.cxx
-    inc/bit_plane.hxx
-    src/bit_plane.cxx
+    inc/raster/scan.hxx
+    inc/raster/rop.hxx
+    inc/raster/blt.hxx
+    src/raster/blt.cxx
+    inc/raster/phase_align.hxx
+    src/raster/phase_align.cxx
+    inc/raster/bit_plane.hxx
+    src/raster/bit_plane.cxx
 )
 
 # Set the include directories for the library.

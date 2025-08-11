@@ -20,7 +20,7 @@
 /// \details This file contains the implementation of the PhaseAlign class and its derived classes,
 ///          which handle the fetching and storing of bits with respect to their phase alignment.
 
-#include "phase_align.hxx"
+#include "raster/phase_align.hxx"
 
 namespace raster {
 
