@@ -1,5 +1,6 @@
 #pragma once
 
+/// \brief Binary raster operation.
 enum Rop2 {
   rop0,
   ropDSon,
@@ -27,6 +28,8 @@ enum Rop2 {
   srcCopy = ropS,
   srcPaint = ropDSo,
 };
+
+/// \brief Unary raster operation.
 enum Rop1 {
   blackness = rop0,
   dstInvert = ropDn,
