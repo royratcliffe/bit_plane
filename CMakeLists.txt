@@ -1,6 +1,8 @@
 cmake_minimum_required(VERSION 3.25)
 project(bit_plane)
 
+set(CMAKE_CXX_CLANG_TIDY clang-tidy)
+
 add_library(bit_plane
     inc/raster/scan.hxx
     inc/raster/rop.hxx
