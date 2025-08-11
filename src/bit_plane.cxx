@@ -91,6 +91,7 @@ BitPlane::BitPlane() : width(0), height(0), store(0) {
   // care because delete []NULL is okay.
   autoDelete = false;
 }
+
 BitPlane::BitPlane(int cx, int cy, scanbyte v[]) {
   if (cx < 0)
     cx = -cx;
@@ -109,6 +110,7 @@ BitPlane::BitPlane(int cx, int cy, scanbyte v[]) {
   store = v;
   autoDelete = false;
 }
+
 // Don't bit-wise copy a BitPlane!
 BitPlane::BitPlane(const BitPlane &copy) {
   scanbyte *v;
