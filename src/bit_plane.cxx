@@ -56,8 +56,8 @@
 //
 //              scanbyte vPatBits[] =
 //              {
-//                0x40000000, // #. (black-white)
-//                0x80000000, // .# (white-black)
+//                0x40U, // #. (black-white)
+//                0x80U, // .# (white-black)
 //              };
 //              BitPlane imagePat(2, 2, vPatBits);
 //              BitPlane image;
