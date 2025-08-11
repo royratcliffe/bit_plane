@@ -22,7 +22,8 @@
         "-A"
       ],
       "stopAtEntry": false,
-      "cwd": "${workspaceFolder}"
+      "cwd": "${workspaceFolder}",
+      "externalConsole": false
     }
   ]
 }
