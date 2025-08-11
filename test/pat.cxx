@@ -12,7 +12,8 @@ extern "C" int test_pat() {
   };
   BitPlane imagePat(2, 2, vPatBits);
   BitPlane image;
-  image.create(32, 32);
+  // Create a new image in heap space. Make it 8x8 pixels.
+  assert(image.create(8, 8));
 
   for (int y = 0; y < image.getHeight(); y += imagePat.getHeight()) {
     for (int x = 0; x < image.getWidth(); x += imagePat.getWidth()) {
