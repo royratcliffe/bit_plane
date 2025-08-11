@@ -121,11 +121,16 @@ public:
   int getHeight() const { return height; }
 
 protected:
-  int width = 0;
-  int height = 0;
-  int widthScanBytes = 0;
-  scanbyte *store = nullptr;
-  bool autoDelete = false;
+  int width = 0; ///< Width of the bit-plane.
+  int height = 0; ///< Height of the bit-plane.
+  int widthScanBytes = 0; ///< Width of the bit-plane in scan bytes.
+  scanbyte *store = nullptr; ///< Pointer to the bit-plane scan bytes.
+  bool autoDelete = false; ///< Flag indicating whether to delete the bit-plane.
+
+  /// \brief Find the scan byte containing the bit at the specified coordinates.
+  /// \param x X-coordinate of the bit.
+  /// \param y Y-coordinate of the bit.
+  /// \return Pointer to the scan byte containing the bit, or nullptr if out of bounds.
   scanbyte *findBits(int x, int y) const;
 
 public:
