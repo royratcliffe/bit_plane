@@ -1,6 +1,8 @@
 #include "phase_align.hxx"
 #include "rop.hxx"
 
+#include <cassert>
+
 // Blt functor
 // ~~~ ~~~~~~~
 // The Blt class encapsulates blit behaviour in a functor object.  Blt
@@ -23,7 +25,7 @@
 class Blt {
 public:
   Blt(Rop2 rop2) : rop(vrop[rop2]) {
-    // static_assert(0 <= rop2 && rop2 < Rop2::ropMax); // ropMax == 16
+    assert(0 <= rop2 && rop2 < Rop2::ropMax); // ropMax == 16
   }
   void fetchLogicStore(scanbyte mask) { *store++ = (*store & ~mask) | (mask & fetchLogic()); }
   void fetchLogicStore() { *store++ = fetchLogic(); }
