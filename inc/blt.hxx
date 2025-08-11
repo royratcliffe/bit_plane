@@ -5,7 +5,7 @@
 // ~~~ ~~~~~~~
 // The Blt class encapsulates blit behaviour in a functor object.  Blt
 // functors wrap up the raster fetch-logic-store operation.  BitBlt
-// executes a fetch-logic-store on every longword intersecting the destin-
+// executes a fetch-logic-store on every scan byte intersecting the destin-
 // ation rectangle.  Blt functor's primary operation therefore is
 // fetchLogicStore.  Calling it fetches 32 phase-aligned bits from the
 // source, performs the raster logic, stores the resulting bits at the

@@ -54,7 +54,7 @@
 //      ructor its width, height and array address.  The extract below
 //      illustrates the alternative ways of making BitPlanes.
 //
-//              longword vPatBits[] =
+//              scanbyte vPatBits[] =
 //              {
 //                0x40000000, // #. (black-white)
 //                0x80000000, // .# (white-black)
@@ -87,7 +87,7 @@
 BitPlane::BitPlane() : width(0), height(0), store(0) {
   // Setting width and height to zero makes the BitPlane valid and
   // safe for blitting.  When one or both are zero, the value of
-  // widthLongWords doesn't matter: blit operations won't get past
+  // widthScanBytes doesn't matter: blit operations won't get past
   // clipping.  When store is NULL, autoDelete is really a don't-
   // care because delete []NULL is okay.
   autoDelete = false;
@@ -175,9 +175,9 @@ bool BitPlane::create(int cx, int cy) {
 // BitPlane::findBits(x,y)
 // ~~~~~~~~~~~~~~~~~~~~~~~
 // Given the co-ordinate of a bit, findBits returns the address of its
-// longword.  The calculation assumes one bit per pixel and longword-aligned
+// scan byte.  The calculation assumes one bit per pixel and scan byte-aligned
 // scan lines --- BitPlane class constraints.  Expression x & 7 gives
-// the bit's position within the longword; where 0 corresponds to the most
+// the bit's position within the scan byte; where 0 corresponds to the most
 // significant bit, 7 to bit zero.  The x and y co-ordinates aren't
 // clipped.  FindBits is a protected helper.
 
@@ -316,7 +316,7 @@ bool BitPlane::bitBlt(int x, int y, int cx, int cy, const BitPlane &bitPlaneSrc,
   // Decide how to fetch the source bits.  There are three PhaseAlign
   // functors to choose from, based on how the bits are out of phase.
   // The destination alignment is x & 7, i.e. how many bits from the
-  // left side of the longword.  Expression xSrc & 7 gives the source
+  // left side of the scan byte.  Expression xSrc & 7 gives the source
   // alignment.  The sign and magnitude of the difference between the
   // alignments determines the direction and amount of shift.
   Blt blt(rop2);
@@ -335,7 +335,7 @@ bool BitPlane::bitBlt(int x, int y, int cx, int cy, const BitPlane &bitPlaneSrc,
   }
 
   // This blit implementation always iterates down the scan lines top-
-  // to-bottom, and steps across the scan-line longwords left-to-right.
+  // to-bottom, and steps across the scan-line scan bytes left-to-right.
   // Stepping directions matter when the source plane is ``this'' plane
   // and the source area overlaps the destination.  Because the algor-
   // ithm scans top-to-bottom and steps left-to-right regardless, the
@@ -343,12 +343,12 @@ bool BitPlane::bitBlt(int x, int y, int cx, int cy, const BitPlane &bitPlaneSrc,
   // the resulting bit pattern is not what you want or expect so beware!
   //
   // The position of the last bit in the scan line is given by x+cx-1
-  // (assuming cx is positive, i.e. 0<cx).  Dividing this by 32 (right-
-  // shifting five times) gives you the position of the last longword in
+  // (assuming cx is positive, i.e. 0<cx).  Dividing this by 8 (right-
+  // shifting three times) gives you the position of the last scan byte in
   // the scan line, relative to the start of the scan line.  How many
-  // longwords in each scan line intersect the blitting region?  There's
-  // always at least one because 0<cx.  Expression (xMax>>5) - (x>>5)
-  // yields how many ``extra'' longwords per scan line after the first.
+  // scan bytes in each scan line intersect the blitting region?  There's
+  // always at least one because 0<cx.  Expression (xMax>>3) - (x>>3)
+  // yields how many ``extra'' scan bytes per scan line after the first.
   const int xMax = x + cx - 1;
   const int extraScanByteCount = (xMax >> 3) - (x >> 3);
   const scanbyte scanOrgMask = 0xffU >> (x & 7);
@@ -358,7 +358,7 @@ bool BitPlane::bitBlt(int x, int y, int cx, int cy, const BitPlane &bitPlaneSrc,
   blt.store = findBits(x, y);
   blt.phaseAlign->store = bitPlaneSrc.findBits(xSrc, ySrc);
   if (extraScanByteCount == 0) {
-    // The scan line's bits begin and end in the same longword.  There's
+    // The scan line's bits begin and end in the same scan byte.  There's
     // just one fetchLogicStore every scan line, so optimize the blit
     // by merging the masks for a single-step fetch-logic-store.
     const scanbyte scanMask = scanOrgMask & scanExtMask;
