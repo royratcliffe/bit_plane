@@ -35,3 +35,12 @@ add_executable(test_runner
 target_link_libraries(test_runner PRIVATE bit_plane)
 
 add_test(NAME pat COMMAND test_runner test/pat)
+
+# https://cmake.org/cmake/help/latest/module/FindDoxygen.html
+# https://www.mcternan.me.uk/mscgen/
+find_package(Doxygen OPTIONAL_COMPONENTS dot mscgen dia)
+if(DOXYGEN_FOUND)
+    set(OPTIMIZE_OUTPUT_FOR_CXX YES)
+    set(DOXYGEN_SOURCE_BROWSER YES)
+    doxygen_add_docs(doxy ${PROJECT_SOURCE_DIR}/inc ${PROJECT_SOURCE_DIR}/src)
+endif()
