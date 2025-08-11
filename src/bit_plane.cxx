@@ -164,7 +164,7 @@ bool BitPlane::create(int cx, int cy) {
   if (cx & 7)
     ++widthScanBytes;
   store = new scanbyte[widthScanBytes * cy];
-  if (store == 0)
+  if (store == nullptr)
     return false;
   autoDelete = true;
   width = cx;
