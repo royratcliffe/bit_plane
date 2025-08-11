@@ -59,16 +59,49 @@
 class BitPlane {
 
 public:
+  /// \brief Default constructor.
+  /// \details Constructs an empty bit-plane.
   BitPlane();
+
+  /// \brief Parameterised constructor.
+  /// \param cx Width of the bit-plane.
+  /// \param cy Height of the bit-plane.
+  /// \param v Pointer to the bit-plane scan bytes.
   BitPlane(int cx, int cy, scanbyte v[]);
-  // Don't bit-wise copy a BitPlane!
+
+  /// \brief Copy constructor.
+  /// \param copy Bit-plane to copy.
   BitPlane(const BitPlane &copy);
 
+  /// \brief Create a new dynamic memory allocated bit-plane.
+  /// \param cx Width of the bit-plane.
+  /// \param cy Height of the bit-plane.
+  /// \return True if successful, false otherwise.
   bool create(int cx, int cy);
 
-  bool bitBlt(int, int, int, int, const BitPlane &, int, int, Rop2); // binary
-  bool bitBlt(int, int, int, int, Rop1);                             // unary
+  /// \brief Bit-block transfer with binary raster operation.
+  /// \param x Destination x-coordinate.
+  /// \param y Destination y-coordinate.
+  /// \param cx Width of the destination rectangle.
+  /// \param cy Height of the destination rectangle.
+  /// \param bitPlaneSrc Source bit-plane.
+  /// \param xSrc Source x-coordinate.
+  /// \param ySrc Source y-coordinate.
+  /// \param rop2 Raster operation.
+  /// \return True if successful, false otherwise.
+  bool bitBlt(int x, int y, int cx, int cy, const BitPlane &bitPlaneSrc, int xSrc, int ySrc, Rop2 rop2);
 
+  /// \brief Bit-block transfer with unary raster operation.
+  /// \param x Destination x-coordinate.
+  /// \param y Destination y-coordinate.
+  /// \param cx Width of the destination rectangle.
+  /// \param cy Height of the destination rectangle.
+  /// \param rop1 Raster operation.
+  /// \return True if successful, false otherwise.
+  bool bitBlt(int x, int y, int cx, int cy, Rop1 rop1);
+
+  /// \brief Destructor.
+  /// \details Destroys the bit-plane and releases any allocated resources.
   ~BitPlane() {
     width = 0;
     height = 0;
@@ -79,7 +112,12 @@ public:
     store = nullptr;
   }
 
+  /// \brief Get the width of the bit-plane.
+  /// \return Width of the bit-plane.
   int getWidth() const { return width; }
+
+  /// \brief Get the height of the bit-plane.
+  /// \return Height of the bit-plane.
   int getHeight() const { return height; }
 
 protected:
@@ -91,5 +129,9 @@ protected:
   scanbyte *findBits(int x, int y) const;
 
 public:
+  /// \brief Get a pointer to the bits at the specified coordinates.
+  /// \param x X-coordinate of the bits.
+  /// \param y Y-coordinate of the bits.
+  /// \return Pointer to the bits at the specified coordinates.
   const scanbyte *bits(int x, int y) const;
 };
