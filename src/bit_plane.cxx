@@ -1,4 +1,4 @@
-/// SPDX-License-Identifier: MIT
+// SPDX-License-Identifier: MIT
 ///
 /// \copyright 1996, 1998, 1999, 2002, 2025, Roy Ratcliffe, Northumberland, United Kingdom
 ///

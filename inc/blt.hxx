@@ -1,4 +1,4 @@
-/// SPDX-License-Identifier: MIT
+// SPDX-License-Identifier: MIT
 ///
 /// \copyright 2025, Roy Ratcliffe, Northumberland, United Kingdom
 ///
