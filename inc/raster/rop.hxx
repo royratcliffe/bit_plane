@@ -1,4 +1,4 @@
-/// SPDX-License-Identifier: MIT
+// SPDX-License-Identifier: MIT
 ///
 /// \copyright 2025, Roy Ratcliffe, Northumberland, United Kingdom
 ///
@@ -15,13 +15,43 @@
 /// COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR
 /// OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 ///
-/// \file scan.hxx
-/// \brief Bit-plane scan byte type definition.
+/// \file rop.hxx
+/// \brief Raster operations.
 
 #pragma once
 
-#include <stdint.h>
+/// \brief Binary raster operation.
+enum Rop2 {
+  rop0,
+  ropDSon,
+  ropDSna,
+  ropSn,
+  ropSDna,
+  ropDn,
+  ropDSx,
+  ropDSan,
+  ropDSa,
+  ropDSxn,
+  ropD,
+  ropDSno,
+  ropS,
+  ropSDno,
+  ropDSo,
+  rop1,
+  ropMax,
+  notSrcErase = ropDSon,
+  notSrcCopy = ropSn,
+  srcErase = ropSDna,
+  srcInvert = ropDSx,
+  srcAnd = ropDSa,
+  mergePaint = ropDSno,
+  srcCopy = ropS,
+  srcPaint = ropDSo,
+};
 
-/// \brief Scan byte type.
-/// \details This type is used to represent a single byte in the bit-plane.
-using scanbyte = uint8_t;
+/// \brief Unary raster operation.
+enum Rop1 {
+  blackness = rop0,
+  dstInvert = ropDn,
+  whiteness = rop1,
+};

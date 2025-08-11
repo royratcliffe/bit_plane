@@ -1,4 +1,4 @@
-/// SPDX-License-Identifier: MIT
+// SPDX-License-Identifier: MIT
 ///
 /// \copyright 1996, 1998, 1999, 2002, 2025, Roy Ratcliffe, Northumberland, United Kingdom
 ///
@@ -54,9 +54,32 @@
 //
 //**********************************************************************
 
-#include "rop.hxx"
-#include "scan.hxx"
+#include "raster/rop.hxx"
+#include "raster/scan.hxx"
 
+namespace raster {
+
+/// \class BitPlane
+/// \brief Represents a two-dimensional bit-plane for binary image operations.
+///
+/// The BitPlane class provides functionality for creating, copying, and manipulating
+/// binary images using bit-block transfers and raster operations. It manages memory
+/// for the bit-plane data and supports both unary and binary raster operations.
+///
+/// \note The class handles dynamic memory allocation for the bit-plane scan bytes,
+/// and ensures proper cleanup in the destructor.
+///
+/// \section Usage
+/// - Create an empty or parameterised bit-plane.
+/// - Perform bit-block transfers with raster operations.
+/// - Access bit-plane dimensions and raw scan bytes.
+///
+/// \section RasterOperations Raster Operations
+/// Supports both unary (Rop1) and binary (Rop2) raster operations for bit-block transfers.
+///
+/// \section MemoryManagement Memory Management
+/// The class manages its own memory for the bit-plane data, with an option to
+/// auto-delete the allocated scan bytes.
 class BitPlane {
 
 public:
@@ -141,3 +164,5 @@ public:
   /// \return Pointer to the bits at the specified coordinates.
   const scanbyte *bits(int x, int y) const;
 };
+
+} // namespace raster

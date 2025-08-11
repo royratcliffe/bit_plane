@@ -118,7 +118,7 @@ BitPlane::BitPlane(const BitPlane &copy) {
   scanbyte *v;
   if (copy.autoDelete) {
     v = new scanbyte[copy.widthScanBytes * copy.height];
-    if (v == 0)
+    if (v == nullptr)
       return;
     (void)memcpy(v, copy.store, sizeof(scanbyte) * copy.widthScanBytes * copy.height);
   } else

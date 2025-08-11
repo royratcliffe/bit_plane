@@ -1,4 +1,4 @@
-/// SPDX-License-Identifier: MIT
+// SPDX-License-Identifier: MIT
 ///
 /// \copyright 2025, Roy Ratcliffe, Northumberland, United Kingdom
 ///
@@ -11,8 +11,8 @@
 ///     portions of the Software.
 ///
 /// THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE
-/// WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR
-/// COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR
+/// WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS
+/// OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR
 /// OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 ///
 /// \file phase_align.hxx
@@ -28,6 +28,8 @@
 #include "scan.hxx"
 
 #include <cstddef>
+
+namespace raster {
 
 // PhaseAlign functor
 // ~~~~~~~~~~ ~~~~~~~
@@ -69,3 +71,5 @@ public:
   void prefetch() override { carry = *store; }
   scanbyte fetch() override;
 };
+
+} // namespace raster

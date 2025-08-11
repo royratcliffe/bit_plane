@@ -1,4 +1,4 @@
-/// SPDX-License-Identifier: MIT
+// SPDX-License-Identifier: MIT
 ///
 /// \copyright 2025, Roy Ratcliffe, Northumberland, United Kingdom
 ///
@@ -11,8 +11,8 @@
 ///     portions of the Software.
 ///
 /// THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE
-/// WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR
-/// COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR
+/// WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS
+/// OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR
 /// OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 ///
 /// \file phase_align.cxx
@@ -20,7 +20,9 @@
 /// \details This file contains the implementation of the PhaseAlign class and its derived classes,
 ///          which handle the fetching and storing of bits with respect to their phase alignment.
 
-#include "phase_align.hxx"
+#include "raster/phase_align.hxx"
+
+namespace raster {
 
 // Exchange and shift --- some in-line assembler macros.  GNU has a
 // tricky optimizer.  Watch the operand constraints!
@@ -63,3 +65,5 @@ scanbyte LeftShift::fetch() {
   shldl(shiftCount, lo, hi); // FEDCBA98 76543210 << shiftCount
   return hi;
 }
+
+} // namespace raster
