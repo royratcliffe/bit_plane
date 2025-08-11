@@ -36,7 +36,7 @@
 // scan byte, PhaseAlign's job is to line them up with the destination bits.
 // Its two operations are prefetch and fetch.  Calling prefetch at the
 // start of a scan line prepares the functor for phase alignment.  Call-
-// ing fetch thereafter loads and aligns the source in 32-bit chunks.
+// ing fetch thereafter loads and aligns the source in 8-bit chunks.
 //
 // The base PhaseAlign class does straight fetching---use it when source
 // and destination are in line.  Subclasses LeftShift and RightShift

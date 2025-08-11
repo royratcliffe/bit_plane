@@ -33,9 +33,9 @@
 // functors wrap up the raster fetch-logic-store operation.  BitBlt
 // executes a fetch-logic-store on every scan byte intersecting the destin-
 // ation rectangle.  Blt functor's primary operation therefore is
-// fetchLogicStore.  Calling it fetches 32 phase-aligned bits from the
+// fetchLogicStore.  Calling it fetches 8 phase-aligned bits from the
 // source, performs the raster logic, stores the resulting bits at the
-// destination, and steps along the scan line to the next 32 bits.  The
+// destination, and steps along the scan line to the next 8 bits.  The
 // operation is overloaded for masked and unmasked storing.  Ones in the
 // mask specify which bits to store.
 //
