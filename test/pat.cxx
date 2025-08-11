@@ -1,5 +1,6 @@
 #include <bit_plane.hxx>
 
+#include <cassert>
 #include <iostream>
 
 extern "C" int test_pat() {
@@ -10,15 +11,13 @@ extern "C" int test_pat() {
   BitPlane imagePat(2, 2, vPatBits);
   BitPlane image;
   image.create(32, 32);
-  int y = 0;
-  while (y < image.getHeight()) {
-    int x = 0;
-    while (x < image.getWidth()) {
+
+  for (int y = 0; y < image.getHeight(); y += imagePat.getHeight()) {
+    for (int x = 0; x < image.getWidth(); x += imagePat.getWidth()) {
       image.bitBlt(x, y, imagePat.getWidth(), imagePat.getHeight(), imagePat, 0, 0, Rop2::srcCopy);
-      x += imagePat.getWidth();
     }
-    y += imagePat.getHeight();
   }
+
   for (int x = 0; x < image.getWidth(); ++x) {
     for (int y = 0; y < image.getHeight(); ++y) {
       scanbyte v[] = {0x00U};
@@ -26,11 +25,9 @@ extern "C" int test_pat() {
       imageBit.bitBlt(0, 0, 1, 1, image, x, y, Rop2::srcCopy);
       scanbyte bit = v[0] >> 7;
       std::cout << (bit ? '#' : '.');
-      if (bit != (x & 1U) ^ (y & 1U)) {
-        return 1;
-      }
+      assert(bit == ((x & 1U) ^ (y & 1U)));
     }
-    std::cout << '\n';
+    std::cout << std::endl;
   }
   return 0;
 }
