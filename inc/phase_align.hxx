@@ -1,83 +1,71 @@
+/// SPDX-License-Identifier: MIT
+///
+/// \copyright 2025, Roy Ratcliffe, Northumberland, United Kingdom
+///
+/// Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated
+/// documentation files (the "Software"), to deal in the Software without restriction, including without limitation the
+/// rights to use, copy, modify, merge, publish, distribute, sub-license, and/or sell copies of the Software, and to
+/// permit persons to whom the Software is furnished to do so, subject to the following conditions:
+///
+///     The above copyright notice and this permission notice shall be included in all copies or substantial
+///     portions of the Software.
+///
+/// THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE
+/// WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR
+/// COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR
+/// OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
+///
+/// \file phase_align.hxx
+/// \brief Phase alignment for bit-plane operations.
+/// \details PhaseAlign actively aligns source bits with destination bits during bit-plane operations.
+/// When source bits occupy a different position within the scan byte than the destination bits,
+/// PhaseAlign shifts them into alignment. It provides two main operations: prefetch and fetch.
+/// Prefetching prepares the functor for phase alignment at the start of a scan line.
+/// Fetching then loads and aligns the source bits in 8-bit chunks as the scan progresses.
+
+#pragma once
+
 #include "scan.hxx"
+
+#include <cstddef>
 
 // PhaseAlign functor
 // ~~~~~~~~~~ ~~~~~~~
 // The PhaseAlign functor fetches source bits, aligning them with the
 // destination bits.  If the source bits sit in a different part of the
-// longword, PhaseAlign's job is to line them up with the destination bits.
+// scan byte, PhaseAlign's job is to line them up with the destination bits.
 // Its two operations are prefetch and fetch.  Calling prefetch at the
 // start of a scan line prepares the functor for phase alignment.  Call-
-// ing fetch thereafter loads and aligns the source in 32-bit chunks.
+// ing fetch thereafter loads and aligns the source in 8-bit chunks.
 //
 // The base PhaseAlign class does straight fetching---use it when source
 // and destination are in line.  Subclasses LeftShift and RightShift
 // derive from PhaseAlign; they line up the bits by shifting left or
-// right.  Which way to shift depends on where, relative to the longword
+// right.  Which way to shift depends on where, relative to the scan byte
 // boundary, the first source bit lies compared with the first destinat-
 // ion bit.  When to the right, source bits need shifting to the left,
 // and vice versa.  When in phase, shifting is unnecessary.
 
 class PhaseAlign {
 public:
+  virtual ~PhaseAlign() = default;
   virtual void prefetch() {}
-  virtual longword fetch() // Fetch() retrieves the next
-  {                        // phase-aligned longword and steps
+  virtual scanbyte fetch() // Fetch() retrieves the next
+  {                        // phase-aligned scan byte and steps
     return *store++;       // along the scan line.
   }
-  longword *store;
+  scanbyte *store = nullptr;
 };
 
 class RightShift : public PhaseAlign {
 public:
-  virtual longword fetch();
-  longword carry;
-  int shiftCount;
+  scanbyte fetch() override;
+  scanbyte carry = 0x00U;
+  int shiftCount = 0;
 };
-
-// Exchange and shift --- some in-line assembler macros.  GNU has a
-// tricky optimizer.  Watch the operand constraints!
-//
-//              xchgl(r,g)              32-bit exchange
-//              shrdl(c,r,g)            64-bit right shift
-//              shldl(c,r,g)            64-bit left shift
-//
-// 32-bit exchange swaps the contents of a register with a register or
-// memory.  It reads operands r and g then writes operands r and g.
-// Double shift instructions input c, r and g then output g; clobbering
-// the flags along the way.
-inline void xchgl(longword &r, longword &g) {
-  longword t = r;
-  r = g;
-  g = t;
-}
-inline void shrdl(int c, longword &r, longword &g) { g = (r << (32 - c)) | (g >> c); }
-inline void shldl(int c, longword &r, longword &g) { g = (g << c) | (r >> (32 - c)); }
-
-longword RightShift::fetch() {
-  longword hi;
-  longword lo;
-  hi = lo = *store++; // post-increment
-  xchgl(hi, carry);
-  shrdl(shiftCount, hi, lo);
-  return lo;
-}
 
 class LeftShift : public RightShift {
 public:
-  virtual void prefetch() { carry = *store; }
-  virtual longword fetch();
+  void prefetch() override { carry = *store; }
+  scanbyte fetch() override;
 };
-
-longword LeftShift::fetch() {
-  // Load 64 bits of the scan line into registers.  In hexadecimal
-  // nybbles: FEDCBA9876543210.  Prefetch or the last fetch loaded F..8,
-  // the high bits.  This fetch loads 7..0, the low bits.  Carry 7..0
-  // over to the next fetch.  Shift all 64 bits left by shiftCount and
-  // return the high 32 bits.
-  longword hi;
-  longword lo;
-  hi = lo = *++store; // pre-increment
-  xchgl(hi, carry);
-  shldl(shiftCount, lo, hi); // FEDCBA98 76543210 << shiftCount
-  return hi;
-}

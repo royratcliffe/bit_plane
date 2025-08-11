@@ -1,27 +1,32 @@
-//**    $Id: BitPlane.cc,v 1.3 2002/03/19 12:19:40 royr Exp $
-//
-//      Copyright (C) 1996, 1998, 1999, Roy Ratcliffe, United Kingdom.
-//      All rights reserved.
-//
-//      Permission is hereby granted, free of charge,  to any person obtaining a
-//      copy  of  this  software  and    associated   documentation  files  (the
-//      "Software"), to deal in  the   Software  without  restriction, including
-//      without limitation the rights to  use,   copy,  modify,  merge, publish,
-//      distribute, sublicense, and/or sell  copies  of   the  Software,  and to
-//      permit persons to whom the Software is   furnished  to do so, subject to
-//      the following conditions:
-//
-//          The above copyright notice and this permission notice shall be
-//          included in all copies or substantial portions of the Software.
-//
-//      THE SOFTWARE IS PROVIDED "AS IS", WITHOUT  WARRANTY OF ANY KIND, EXPRESS
-//      OR  IMPLIED,  INCLUDING  BUT  NOT   LIMITED    TO   THE   WARRANTIES  OF
-//      MERCHANTABILITY, FITNESS FOR A PARTICULAR   PURPOSE AND NONINFRINGEMENT.
-//      IN NO EVENT SHALL THE AUTHORS  OR   COPYRIGHT  HOLDERS BE LIABLE FOR ANY
-//      CLAIM, DAMAGES OR OTHER LIABILITY,  WHETHER   IN  AN ACTION OF CONTRACT,
-//      TORT OR OTHERWISE, ARISING FROM,  OUT  OF   OR  IN  CONNECTION  WITH THE
-//      SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
-//
+/// SPDX-License-Identifier: MIT
+///
+/// \copyright 1996, 1998, 1999, 2002, 2025, Roy Ratcliffe, Northumberland, United Kingdom
+///
+/// Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated
+/// documentation files (the "Software"), to deal in the Software without restriction, including without limitation the
+/// rights to use, copy, modify, merge, publish, distribute, sub-license, and/or sell copies of the Software, and to
+/// permit persons to whom the Software is furnished to do so, subject to the following conditions:
+///
+///     The above copyright notice and this permission notice shall be included in all copies or substantial
+///     portions of the Software.
+///
+/// THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE
+/// WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS
+/// OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR
+/// OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
+///
+/// \file bit_plane.cxx
+/// \brief BitPlane class implementation.
+/// \details This file contains the implementation of the BitPlane class, which represents a rectangular array of bits
+///          mapped one-to-one with pixels. The class provides operations for creating, manipulating, and
+///          destroying bit planes.
+
+#include "bit_plane.hxx"
+#include "blt.hxx"
+
+#include <cassert> // for assert()
+#include <cstring> // for memcpy()
+
 //**    Name
 //
 //      BitPlane --- rectangular arrays of bits
@@ -54,10 +59,10 @@
 //      ructor its width, height and array address.  The extract below
 //      illustrates the alternative ways of making BitPlanes.
 //
-//              longword vPatBits[] =
+//              scanbyte vPatBits[] =
 //              {
-//                0x40000000, // #. (black-white)
-//                0x80000000, // .# (white-black)
+//                0x40U, // #. (black-white)
+//                0x80U, // .# (white-black)
 //              };
 //              BitPlane imagePat(2, 2, vPatBits);
 //              BitPlane image;
@@ -78,22 +83,16 @@
 //
 //**********************************************************************
 
-#include "bit_plane.hxx"
-#include "blt.hxx"
-
-#include <cstring> // for memcpy()
-
-#include <cassert>
-
 BitPlane::BitPlane() : width(0), height(0), store(0) {
   // Setting width and height to zero makes the BitPlane valid and
   // safe for blitting.  When one or both are zero, the value of
-  // widthLongWords doesn't matter: blit operations won't get past
+  // widthScanBytes doesn't matter: blit operations won't get past
   // clipping.  When store is NULL, autoDelete is really a don't-
   // care because delete []NULL is okay.
   autoDelete = false;
 }
-BitPlane::BitPlane(int cx, int cy, longword v[]) {
+
+BitPlane::BitPlane(int cx, int cy, scanbyte v[]) {
   if (cx < 0)
     cx = -cx;
   if (cy < 0)
@@ -101,9 +100,9 @@ BitPlane::BitPlane(int cx, int cy, longword v[]) {
   if (cx > 0 && cy > 0) {
     width = cx;
     height = cy;
-    widthLongWords = cx >> 5;
-    if (cx & 31)
-      ++widthLongWords;
+    widthScanBytes = cx >> 3;
+    if (cx & 7)
+      ++widthScanBytes;
   } else {
     width = 0;
     height = 0;
@@ -111,37 +110,81 @@ BitPlane::BitPlane(int cx, int cy, longword v[]) {
   store = v;
   autoDelete = false;
 }
+
 // Don't bit-wise copy a BitPlane!
 BitPlane::BitPlane(const BitPlane &copy) {
-  longword *v;
+  scanbyte *v;
   if (copy.autoDelete) {
-    v = new longword[copy.widthLongWords * copy.height];
+    v = new scanbyte[copy.widthScanBytes * copy.height];
     if (v == 0)
       return;
-    (void)memcpy(v, copy.store, sizeof(longword) * copy.widthLongWords * copy.height);
+    (void)memcpy(v, copy.store, sizeof(scanbyte) * copy.widthScanBytes * copy.height);
   } else
     v = copy.store;
   width = copy.width;
   height = copy.height;
-  widthLongWords = copy.widthLongWords;
+  widthScanBytes = copy.widthScanBytes;
   store = v;
   autoDelete = copy.autoDelete;
+}
+
+//**********************************************************************
+//                                                      BitPlane::create
+//**********************************************************************
+//
+//**    Synopsis
+//
+//      void create(cx, cy)
+//      int cx;
+//      int cy;
+//
+//**    Description
+//
+//      The create operation dynamically creates a bit plane on the free
+//      store with the specified width and height.  The destructor
+//      releases the bit block memory.  To free it another way, execute
+//      create(0, 0).  In the event of allocation failure, create either
+//      returns false or throws xalloc, and in any case the BitPlane is
+//      empty (0 by 0).
+//
+//**********************************************************************
+
+bool BitPlane::create(int cx, int cy) {
+  if (cx < 0) // Permit negative widths and
+    cx = -cx; // heights by negating them just
+  if (cy < 0) // like extents.
+    cy = -cy;
+  if (cx <= 0 || cy <= 0) // <= traps INT_MIN
+    return false;
+
+  // How to create a new bit plane: first, dispose of the old one; next,
+  // compute the scan line size in double-words; finally, allocate free-
+  // storage for the bits.
+  this->~BitPlane();
+  widthScanBytes = cx >> 3;
+  if (cx & 7)
+    ++widthScanBytes;
+  store = new scanbyte[widthScanBytes * cy];
+  if (store == nullptr)
+    return false;
+  autoDelete = true;
+  width = cx;
+  height = cy;
+  return true;
 }
 
 // BitPlane::findBits(x,y)
 // ~~~~~~~~~~~~~~~~~~~~~~~
 // Given the co-ordinate of a bit, findBits returns the address of its
-// longword.  The calculation assumes one bit per pixel and longword-aligned
-// scan lines --- BitPlane class constraints.  Expression x & 31 gives
-// the bit's position within the longword; where 0 corresponds to the most
-// significant bit, 31 to bit zero.  The x and y co-ordinates aren't
+// scan byte.  The calculation assumes one bit per pixel and scan byte-aligned
+// scan lines --- BitPlane class constraints.  Expression x & 7 gives
+// the bit's position within the scan byte; where 0 corresponds to the most
+// significant bit, 7 to bit zero.  The x and y co-ordinates aren't
 // clipped.  FindBits is a protected helper.
 
-inline longword *BitPlane::findBits(int x, int y) const {
-  return store + widthLongWords * y + (x >> 5);
-}
+inline scanbyte *BitPlane::findBits(int x, int y) const { return store + widthScanBytes * y + (x >> 3); }
 
-inline const longword *BitPlane::bits(int x, int y) const { return findBits(x, y); }
+inline const scanbyte *BitPlane::bits(int x, int y) const { return findBits(x, y); }
 
 //**********************************************************************
 //                                                      BitPlane::bitBlt
@@ -236,14 +279,20 @@ bool BitPlane::bitBlt(int x, int y, int cx, int cy, const BitPlane &bitPlaneSrc,
   xSrc += xOff;
   cx -= xOff;
   assert(x >= 0 && xSrc >= 0 && 0 < cx);
-  int cxMax = width - x; // cxMax is the difference betw-
+  // cxMax is the difference betw-
+  // een the width and the origin,
+  // i.e. the maximum transfer
+  // extent possible.  If zero or
+  // negative, the origin is bey-
+  // ond the plane.
+  int cxMax = width - x;
   if (0 >= cxMax)
-    return false;                   // een the width and the origin,
-  if (cxMax < cx)                   // i.e. the maximum transfer
-    cx = cxMax;                     // extent possible.  If zero or
-  cxMax = bitPlaneSrc.width - xSrc; // negative, the origin is bey-
+    return false;
+  if (cxMax < cx)
+    cx = cxMax;
+  cxMax = bitPlaneSrc.width - xSrc;
   if (0 >= cxMax)
-    return false; // ond the plane.
+    return false;
   if (cxMax < cx)
     cx = cxMax;
   int yOff = y < 0 ? (y < ySrc ? -y : -ySrc) : (ySrc < 0 ? -ySrc : 0);
@@ -267,15 +316,15 @@ bool BitPlane::bitBlt(int x, int y, int cx, int cy, const BitPlane &bitPlaneSrc,
 
   // Decide how to fetch the source bits.  There are three PhaseAlign
   // functors to choose from, based on how the bits are out of phase.
-  // The destination alignment is x & 31, i.e. how many bits from the
-  // left side of the longword.  Expression xSrc & 31 gives the source
+  // The destination alignment is x & 7, i.e. how many bits from the
+  // left side of the scan byte.  Expression xSrc & 7 gives the source
   // alignment.  The sign and magnitude of the difference between the
   // alignments determines the direction and amount of shift.
   Blt blt(rop2);
   PhaseAlign fetch;
   RightShift fetchRightShift;
   LeftShift fetchLeftShift;
-  int shiftCount = (x & 31) - (xSrc & 31);
+  int shiftCount = (x & 7) - (xSrc & 7);
   if (shiftCount < 0) {
     fetchLeftShift.shiftCount = -shiftCount;
     blt.phaseAlign = &fetchLeftShift;
@@ -287,7 +336,7 @@ bool BitPlane::bitBlt(int x, int y, int cx, int cy, const BitPlane &bitPlaneSrc,
   }
 
   // This blit implementation always iterates down the scan lines top-
-  // to-bottom, and steps across the scan-line longwords left-to-right.
+  // to-bottom, and steps across the scan-line scan bytes left-to-right.
   // Stepping directions matter when the source plane is ``this'' plane
   // and the source area overlaps the destination.  Because the algor-
   // ithm scans top-to-bottom and steps left-to-right regardless, the
@@ -295,25 +344,25 @@ bool BitPlane::bitBlt(int x, int y, int cx, int cy, const BitPlane &bitPlaneSrc,
   // the resulting bit pattern is not what you want or expect so beware!
   //
   // The position of the last bit in the scan line is given by x+cx-1
-  // (assuming cx is positive, i.e. 0<cx).  Dividing this by 32 (right-
-  // shifting five times) gives you the position of the last longword in
+  // (assuming cx is positive, i.e. 0<cx).  Dividing this by 8 (right-
+  // shifting three times) gives you the position of the last scan byte in
   // the scan line, relative to the start of the scan line.  How many
-  // longwords in each scan line intersect the blitting region?  There's
-  // always at least one because 0<cx.  Expression (xMax>>5) - (x>>5)
-  // yields how many ``extra'' longwords per scan line after the first.
+  // scan bytes in each scan line intersect the blitting region?  There's
+  // always at least one because 0<cx.  Expression (xMax>>3) - (x>>3)
+  // yields how many ``extra'' scan bytes per scan line after the first.
   const int xMax = x + cx - 1;
-  const int extraLongWordCount = (xMax >> 5) - (x >> 5);
-  const longword scanOrgMask = 0xffffffff >> (x & 31);
-  const longword scanExtMask = 0xffffffff << (31 - (xMax & 31));
-  const int displace = widthLongWords - 1 - extraLongWordCount;
-  const int displaceSrc = bitPlaneSrc.widthLongWords - 1 - extraLongWordCount;
+  const int extraScanByteCount = (xMax >> 3) - (x >> 3);
+  const scanbyte scanOrgMask = 0xffU >> (x & 7);
+  const scanbyte scanExtMask = 0xffU << (7 - (xMax & 7));
+  const int displace = widthScanBytes - 1 - extraScanByteCount;
+  const int displaceSrc = bitPlaneSrc.widthScanBytes - 1 - extraScanByteCount;
   blt.store = findBits(x, y);
   blt.phaseAlign->store = bitPlaneSrc.findBits(xSrc, ySrc);
-  if (extraLongWordCount == 0) {
-    // The scan line's bits begin and end in the same longword.  There's
+  if (extraScanByteCount == 0) {
+    // The scan line's bits begin and end in the same scan byte.  There's
     // just one fetchLogicStore every scan line, so optimize the blit
     // by merging the masks for a single-step fetch-logic-store.
-    const longword scanMask = scanOrgMask & scanExtMask;
+    const scanbyte scanMask = scanOrgMask & scanExtMask;
     while (cy--) {
       blt.phaseAlign->prefetch();
       blt.fetchLogicStore(scanMask);
@@ -324,8 +373,8 @@ bool BitPlane::bitBlt(int x, int y, int cx, int cy, const BitPlane &bitPlaneSrc,
     while (cy--) {
       blt.phaseAlign->prefetch();
       blt.fetchLogicStore(scanOrgMask);
-      int longWordCount = extraLongWordCount;
-      while (--longWordCount)
+      int scanByteCount = extraScanByteCount;
+      while (--scanByteCount)
         blt.fetchLogicStore();
       blt.fetchLogicStore(scanExtMask);
       blt.store += displace;
