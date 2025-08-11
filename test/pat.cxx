@@ -1,9 +1,11 @@
 #include <bit_plane.hxx>
 
+#include <iostream>
+
 extern "C" int test_pat() {
   scanbyte vPatBits[] = {
-      0x40, 0x00, 0x00, 0x00, // #. (black-white)
-      0x80, 0x00, 0x00, 0x00, // .# (white-black)
+      0x40U, // #. (black-white)
+      0x80U, // .# (white-black)
   };
   BitPlane imagePat(2, 2, vPatBits);
   BitPlane image;
@@ -16,6 +18,19 @@ extern "C" int test_pat() {
       x += imagePat.getWidth();
     }
     y += imagePat.getHeight();
+  }
+  for (int x = 0; x < image.getWidth(); ++x) {
+    for (int y = 0; y < image.getHeight(); ++y) {
+      scanbyte v[] = {0x00U};
+      BitPlane imageBit(1, 1, v);
+      imageBit.bitBlt(0, 0, 1, 1, image, x, y, Rop2::srcCopy);
+      scanbyte bit = v[0] >> 7;
+      std::cout << (bit ? '#' : '.');
+      if (bit != (x & 1U) ^ (y & 1U)) {
+        return 1;
+      }
+    }
+    std::cout << '\n';
   }
   return 0;
 }
