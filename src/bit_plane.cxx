@@ -27,6 +27,8 @@
 #include <cassert> // for assert()
 #include <cstring> // for memcpy()
 
+namespace raster {
+
 //**    Name
 //
 //      BitPlane --- rectangular arrays of bits
@@ -394,3 +396,5 @@ bool BitPlane::bitBlt(int x, int y, int cx, int cy, Rop1 rop1) {
 }
 
 ////////////////////////////////////////////////////////////////////////
+
+} // namespace raster

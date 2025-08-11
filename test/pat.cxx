@@ -3,6 +3,8 @@
 #include <cassert>
 #include <iostream>
 
+using namespace raster;
+
 extern "C" int test_pat() {
   scanbyte vPatBits[] = {
       0x40U, // #. (black-white)

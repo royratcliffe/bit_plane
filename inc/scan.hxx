@@ -22,6 +22,10 @@
 
 #include <stdint.h>
 
+namespace raster {
+
 /// \brief Scan byte type.
 /// \details This type is used to represent a single byte in the bit-plane.
 using scanbyte = uint8_t;
+
+} // namespace raster

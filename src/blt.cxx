@@ -22,6 +22,8 @@
 
 #include "blt.hxx"
 
+namespace raster {
+
 #define D (*store) // 8-bit destination operand
 #define S fetch()  // 8-bit source operand
 
@@ -43,3 +45,5 @@ ropRevPolish(0, 0x00U) ropRevPolish(DSon, ~(D | S)) ropRevPolish(DSna, D & ~S) r
         &Blt::ropDSx, &Blt::ropDSan, &Blt::ropDSa,  &Blt::ropDSxn, &Blt::ropD,    &Blt::ropDSno,
         &Blt::ropS,   &Blt::ropSDno, &Blt::ropDSo,  &Blt::rop1,
 };
+
+} // namespace raster

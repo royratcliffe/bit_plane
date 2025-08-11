@@ -27,6 +27,8 @@
 
 #include <cassert>
 
+namespace raster {
+
 // Blt functor
 // ~~~ ~~~~~~~
 // The Blt class encapsulates blit behaviour in a functor object.  Blt
@@ -81,3 +83,5 @@ public:
   Rop rop;                // logic: (this->*rop)()
   scanbyte *store;        // store: *store
 };
+
+} // namespace raster
