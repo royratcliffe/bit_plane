@@ -2,6 +2,8 @@ cmake_minimum_required(VERSION 3.25)
 project(bit_plane)
 
 add_library(bit_plane
+    inc/scan.hxx
+    inc/rop.hxx
     inc/blt.hxx
     src/blt.cxx
     inc/phase_align.hxx
