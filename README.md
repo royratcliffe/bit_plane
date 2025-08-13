@@ -1,14 +1,3 @@
----
-# https://rstudio.github.io/visual-markdown-editing/markdown.html
-editor_options:
-  markdown:
-    mode: markdown
-    extensions: +tex_math_dollars+raw_tex
-    wrap: 72
----
-
-<!-- -*- mode: markdown; extensions: +raw_tex -*- -->
-
 # Bit Plane Raster Library
 
 The Bit Plane Raster Library is a lightweight C++ toolkit designed for
