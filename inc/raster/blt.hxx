@@ -53,7 +53,15 @@ public:
   Blt(Rop2 rop2) : rop(vrop[rop2]) {
     assert(0 <= rop2 && rop2 < Rop2::ropMax); // ropMax == 16
   }
-  void fetchLogicStore(scanbyte mask) { *store++ = (*store & ~mask) | (mask & fetchLogic()); }
+  void fetchLogicStore(scanbyte mask) {
+    *store = (*store & ~mask) | (mask & fetchLogic());
+    // Avoid unsequenced modification during access to *store. C++14 standard,
+    // section 1.9, paragraph 15. "If a side effect on a scalar object is
+    // unsequenced relative to either another side effect on the same scalar
+    // object or a value computation using the value of the same scalar object,
+    // the behavior is undefined."
+    store++;
+  }
   void fetchLogicStore() { *store++ = fetchLogic(); }
   scanbyte fetchLogic() {
     // Invoke the Boolean raster-operation; it calls fetch() by
