@@ -29,8 +29,7 @@ data transfer between bit planes. Key features include:
 
 `Blt` class
 
-:   Encapsulates blit (bit-block transfer) operations between bit
-    planes.
+:   Encapsulates blit (bit-block transfer) operations on planes of bits.
 
 `PhaseAlign` class
 
