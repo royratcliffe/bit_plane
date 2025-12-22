@@ -176,6 +176,10 @@ Run the tests with:
 ctest --test-dir build
 ```
 
+## Conclusions
+
+The Bit Plane Raster Library provides a compact and efficient solution for binary raster image manipulation in C++. Its focus on bit-plane techniques, phase alignment, and logical raster operations makes it well-suited for graphics, embedded systems, and image processing tasks where performance and memory usage are critical. By abstracting complex bit-level operations, the library enables developers to implement high-performance raster graphics with minimal overhead and maximum flexibility.
+
 ## License
 
 SPDX-License-Identifier: MIT
